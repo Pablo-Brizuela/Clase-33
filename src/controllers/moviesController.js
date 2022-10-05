@@ -52,23 +52,81 @@ const moviesController = {
     },
     //Aqui dispongo las rutas para trabajar con el CRUD
     add: function (req, res) {
-        
-    },
-    create: function (req,res) {
-
-    },
-    edit: function(req,res) {
-
-    },
-    update: function (req,res) {
-
-    },
-    delete: function (req,res) {
-
-    },
-    destroy: function (req,res) {
-
-    }
+        res.render("moviesAdd");
+      },
+      create: async function (req, res) {
+        try {
+          const newMovie = await db.Movie.create({
+            title: req.body.title,
+            rating: req.body.rating,
+            length: req.body.length,
+            awards: req.body.awards,
+            release_date: req.body.release_date,
+          });
+          console.log({ newMovie });
+          res.redirect("/movies");
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      edit: async function (req, res) {
+        try {
+          const Movie = await db.Movie.findByPk(req.params.id);
+    
+          let date = new Date(Movie.dataValues.release_date).toISOString(); //2010-10-04T00:00:00.000Z
+          date = date.split("T");
+          date = date[0];
+          console.log({ date });
+          Movie.dataValues.release_date = date;
+          res.render("moviesEdit", { Movie });
+        } catch (error) {
+          console.log(error);
+          res.redirect("/movies");
+        }
+      },
+      update: async function (req, res) {
+        try {
+          const newMovie = await db.Movie.update(
+            {
+              title: req.body.title,
+              rating: req.body.rating,
+              length: req.body.length,
+              awards: req.body.awards,
+              release_date: req.body.release_date,
+            },
+            {
+              where: {
+                id: req.params.id,
+              },
+            }
+          );
+          res.redirect("/movies");
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      delete: async function (req, res) {
+        try {
+          const Movie = await db.Movie.findByPk(req.params.id);
+    
+          res.render("moviesDelete", { Movie });
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      destroy: async function (req, res) {
+        try {
+          // await db.ActorMovie.destroy({ where: {movie_id: req.params.id}})
+          await db.Movie.destroy({
+            where: {
+              id: req.params.id,
+            },
+          });
+          res.redirect("/movies");
+        } catch (error) {
+          console.log(error);
+        }
+      },
 }
 
 module.exports = moviesController;
